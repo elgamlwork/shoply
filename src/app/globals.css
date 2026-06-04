@@ -70,6 +70,18 @@
   }
 }
 
+/* Unlayered so it beats Tailwind preflight cursor reset. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+[role="option"],
+[role="tab"],
+[role="menuitem"],
+summary,
+label[for],
+a[href] {
+  cursor: pointer;
+}
+
 @layer utilities {
   .font-display {
     font-family: var(--font-display), ui-serif, Georgia, "Times New Roman", serif;

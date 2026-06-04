@@ -2,26 +2,51 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import type { Product } from "@/types/product";
+import { useAuthStore } from "@/lib/auth/store";
 import { useFavoritesStore } from "@/lib/favorites/store";
-import { discountedPrice, formatCategory, formatPrice } from "@/lib/utils/format";
+import {
+  discountedPrice,
+  formatCategory,
+  formatPrice,
+} from "@/lib/utils/format";
 import { cn } from "@/lib/utils/cn";
 
-export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
+export function ProductCard({
+  product,
+  priority = false,
+}: {
+  product: Product;
+  priority?: boolean;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const user = useAuthStore((s) => s.user);
   const isFavorite = useFavoritesStore((s) => s.ids.includes(product.id));
   const toggle = useFavoritesStore((s) => s.toggle);
+
   const hasDiscount = product.discountPercentage > 0;
   const finalPrice = hasDiscount
     ? discountedPrice(product.price, product.discountPercentage)
     : product.price;
+
+  function handleFavorite() {
+    if (!user) {
+      const from = encodeURIComponent(pathname || "/");
+      router.push(`/login?from=${from}&reason=favorite`);
+      return;
+    }
+    toggle(product.id);
+  }
 
   return (
     <article className="group flex flex-col">
       <div className="relative overflow-hidden rounded-xl bg-[var(--color-surface)] editorial-shadow">
         <Link
           href={`/products/${product.id}`}
-          className="block aspect-[4/5] w-full"
+          className="relative block aspect-[4/5] w-full"
           aria-label={product.title}
         >
           <Image
@@ -35,10 +60,16 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         </Link>
         <button
           type="button"
-          aria-label={isFavorite ? "Remove from favorites" : "Save to favorites"}
-          onClick={() => toggle(product.id)}
+          aria-label={
+            !user
+              ? "Sign in to save to favorites"
+              : isFavorite
+                ? "Remove from favorites"
+                : "Save to favorites"
+          }
+          onClick={handleFavorite}
           className={cn(
-            "absolute right-3 top-3 inline-flex size-9 items-center justify-center rounded-full border bg-[var(--color-surface)]/85 backdrop-blur transition",
+            "absolute right-3 top-3 inline-flex size-9 cursor-pointer items-center justify-center rounded-full border bg-[var(--color-surface)]/85 backdrop-blur transition",
             isFavorite
               ? "border-[var(--color-ink)] text-[var(--color-ink)]"
               : "border-[var(--color-line)] text-[var(--color-muted)] hover:border-[var(--color-ink)] hover:text-[var(--color-ink)]",

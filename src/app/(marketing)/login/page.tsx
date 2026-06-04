@@ -24,6 +24,7 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") ?? "/";
+  const reason = searchParams.get("reason");
   const setUser = useAuthStore((s) => s.setUser);
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -88,11 +89,15 @@ export default function LoginPage() {
     <div className="w-full max-w-md">
       <div className="mb-10 space-y-2 text-center">
         <p className="text-[11px] uppercase tracking-[0.3em] text-[var(--color-muted)]">
-          Welcome back
+          {reason === "favorite" ? "One step away" : "Welcome back"}
         </p>
-        <h1 className="font-display text-4xl text-[var(--color-ink)]">Sign in to Shoply</h1>
+        <h1 className="font-display text-4xl text-[var(--color-ink)]">
+          {reason === "favorite" ? "Sign in to save favorites" : "Sign in to Shoply"}
+        </h1>
         <p className="text-sm text-[var(--color-muted)]">
-          Use the demo credentials, or sign in with an account you created on this device.
+          {reason === "favorite"
+            ? "Use the demo credentials below, or sign in with an account you created on this device — you'll come right back."
+            : "Use the demo credentials, or sign in with an account you created on this device."}
         </p>
       </div>
 

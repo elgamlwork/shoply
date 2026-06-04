@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_NAME } from "@/lib/auth/cookies";
 
-const PUBLIC_PATHS = ["/login", "/register"];
+const AUTH_REQUIRED = ["/favorites"];
+const REVERSE_GATED = ["/login", "/register"];
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -18,17 +19,23 @@ export function proxy(req: NextRequest) {
   }
 
   const token = req.cookies.get(COOKIE_NAME)?.value;
-  const hasValidLooking = token ? isWellFormedJwt(token) : false;
-  const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  const authed = token ? isWellFormedJwt(token) : false;
 
-  if (!isPublic && !hasValidLooking) {
+  const needsAuth = AUTH_REQUIRED.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+  const isReverseGated = REVERSE_GATED.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
+
+  if (needsAuth && !authed) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
-    if (pathname !== "/") url.searchParams.set("from", pathname);
+    url.searchParams.set("from", pathname);
     return NextResponse.redirect(url);
   }
 
-  if (isPublic && hasValidLooking) {
+  if (isReverseGated && authed) {
     const url = req.nextUrl.clone();
     url.pathname = "/";
     url.searchParams.delete("from");

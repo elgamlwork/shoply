@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Heart, Star } from "lucide-react";
 import { getProduct } from "@/lib/api/products";
 import { queryKeys } from "@/lib/query/keys";
+import { useAuthStore } from "@/lib/auth/store";
 import { useFavoritesStore } from "@/lib/favorites/store";
 import { discountedPrice, formatCategory, formatPrice, formatRating } from "@/lib/utils/format";
 import { ErrorState } from "@/components/ui/error-state";
@@ -14,13 +16,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils/cn";
 
 export function ProductDetail({ id }: { id: string }) {
+  const router = useRouter();
   const { data: product, isLoading, isError, refetch } = useQuery({
     queryKey: queryKeys.product(id),
     queryFn: ({ signal }) => getProduct(id, signal),
   });
+  const user = useAuthStore((s) => s.user);
   const isFavorite = useFavoritesStore((s) => s.ids.includes(Number(id)));
   const toggleFavorite = useFavoritesStore((s) => s.toggle);
   const [activeImage, setActiveImage] = useState(0);
+
+  function handleFavorite() {
+    if (!user) {
+      router.push(`/login?from=${encodeURIComponent(`/products/${id}`)}&reason=favorite`);
+      return;
+    }
+    toggleFavorite(Number(id));
+  }
 
   if (isLoading) return <DetailSkeleton />;
   if (isError || !product) {
@@ -137,16 +149,16 @@ export function ProductDetail({ id }: { id: string }) {
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => toggleFavorite(product.id)}
+                onClick={handleFavorite}
                 className={cn(
-                  "inline-flex h-12 items-center justify-center gap-2 rounded-full border px-6 text-xs uppercase tracking-[0.18em] transition",
+                  "inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-full border px-6 text-xs uppercase tracking-[0.18em] transition",
                   isFavorite
                     ? "border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-bg)]"
                     : "border-[var(--color-ink)] text-[var(--color-ink)] hover:bg-[var(--color-ink)] hover:text-[var(--color-bg)]",
                 )}
               >
                 <Heart className={cn("size-4", isFavorite && "fill-current")} aria-hidden />
-                {isFavorite ? "Saved" : "Save to favorites"}
+                {!user ? "Sign in to save" : isFavorite ? "Saved" : "Save to favorites"}
               </button>
             </div>
 
