@@ -2,7 +2,7 @@
 
 > A small, opinionated commerce catalog built as a frontend technical task. Editorial design, real JWT auth via [DummyJSON](https://dummyjson.com), infinite-scroll product grid with search / category / sort, dark mode, favorites, and tests.
 
-Live demo: _add your Vercel URL here_  ·  API: [DummyJSON](https://dummyjson.com/docs)  ·  Postman: [`postman/shoply.postman_collection.json`](./postman/shoply.postman_collection.json)
+Live demo: **[shoply.elgaml.dev](https://shoply.elgaml.dev/)**  ·  API: [DummyJSON](https://dummyjson.com/docs)  ·  Postman: [`postman/shoply.postman_collection.json`](./postman/shoply.postman_collection.json)
 
 ---
 
