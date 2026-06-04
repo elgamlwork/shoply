@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
 
 export default function ShopLayout({ children }: { children: ReactNode }) {
   return (
@@ -8,6 +9,7 @@ export default function ShopLayout({ children }: { children: ReactNode }) {
       <SiteHeader />
       <main className="flex-1">{children}</main>
       <SiteFooter />
+      <ScrollToTop />
     </div>
   );
 }
